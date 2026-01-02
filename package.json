@@ -1,0 +1,79 @@
+{
+  "name": "sudokumaker-community-vscode",
+  "displayName": "SudokuMaker Community",
+  "description": "Add Editor support for SudokuMaker",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.107.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sudokumaker-community-vscode.openSourceToSide",
+        "title": "SudokuMaker: Open Source to the Side",
+        "icon": "$(gist)"
+      },
+      {
+        "command": "sudokumaker-community-vscode.openEditorToSide",
+        "title": "SudokuMaker: Open Editor to the Side",
+        "icon": "$(preview)"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "sudokumaker-community-vscode.editor",
+        "displayName": "SudokuMaker",
+        "selector": [
+          {
+            "filenamePattern": "*.puzzle.json"
+          },
+          {
+            "filenamePattern": "*.puzzle.yaml"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "sudokumaker-community-vscode.openSourceToSide",
+          "when": "resourceFilename =~ /\\.puzzle\\.(json|yaml)$/ && activeCustomEditorId != ''",
+          "group": "navigation"
+        },
+        {
+          "command": "sudokumaker-community-vscode.openEditorToSide",
+          "when": "resourceFilename =~ /\\.puzzle\\.(json|yaml)$/ && activeCustomEditorId == ''",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.107.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
