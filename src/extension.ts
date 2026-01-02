@@ -1,17 +1,51 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { default as express } from 'express';
+import express from 'express';
+import { createProxyMiddleware, responseInterceptor } from 'http-proxy-middleware';
 
 function startServer() {
 	const app = express();
-	// app.get("*")
+
+	const script = `
+		<script>
+
+			// window.setTimeout(() => document.body.innerHTML = "", 3000);
+		</script>
+	`;
+	const headTag = "<head>";
+	const replacement = `${headTag}${script.trim()}`;
+	const TARGET_URL = "https://sudokumaker.app";
+
+	app.use('/', createProxyMiddleware({
+		target: TARGET_URL,
+		changeOrigin: true,
+		selfHandleResponse: true,
+		on: {
+			proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+				if (res.getHeader("Content-Type")?.toString().includes("text/html")) {
+					return (
+						responseBuffer
+							.toString()
+							.replace(headTag, replacement)
+					);
+				} else {
+					return responseBuffer;
+				}
+			})
+		}
+	}));
+
+	app.listen(3002, () => {
+		console.log('Proxy server running on http://localhost:3000');
+	});
 }
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
+	startServer();
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "sudokumaker-community-vscode" is now active!');
@@ -85,7 +119,7 @@ function getWebviewContent() {
         <!DOCTYPE html>
         <html lang="en">
         <body style="margin:0; padding:0; height:100vh; overflow:hidden;">
-            <iframe src="https://sudokumaker.app" 
+            <iframe src="http://localhost:3002"
                     style="width:100%; height:100%; border:none;">
             </iframe>
         </body>
