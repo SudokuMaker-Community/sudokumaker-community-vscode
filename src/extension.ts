@@ -3,19 +3,15 @@
 import * as vscode from 'vscode';
 import express from 'express';
 import { createProxyMiddleware, responseInterceptor } from 'http-proxy-middleware';
+import { randomUUID } from 'node:crypto';
+import * as fs from 'fs';
+import path from 'node:path';
 
-function startServer() {
+function startServer(context: vscode.ExtensionContext) {
 	const app = express();
 
-	const script = `
-		<script>
-
-			// window.setTimeout(() => document.body.innerHTML = "", 3000);
-		</script>
-	`;
-	const headTag = "<head>";
-	const replacement = `${headTag}${script.trim()}`;
 	const TARGET_URL = "https://sudokumaker.app";
+	const scriptPath = context.asAbsolutePath(path.join("inject", "script.js"));
 
 	app.use('/', createProxyMiddleware({
 		target: TARGET_URL,
@@ -23,7 +19,16 @@ function startServer() {
 		selfHandleResponse: true,
 		on: {
 			proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+				// TODO: Add cache headers (no caching)
 				if (res.getHeader("Content-Type")?.toString().includes("text/html")) {
+					const scriptFile = fs.readFileSync(scriptPath);
+					const script = `
+							<script>
+								${scriptFile}
+							</script>
+						`;
+					const headTag = "<head>";
+					const replacement = `${headTag}${script.trim()}`;
 					return (
 						responseBuffer
 							.toString()
@@ -36,7 +41,7 @@ function startServer() {
 		}
 	}));
 
-	app.listen(3002, () => {
+	app.listen(3003, () => {
 		console.log('Proxy server running on http://localhost:3000');
 	});
 }
@@ -45,7 +50,7 @@ function startServer() {
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	startServer();
+	startServer(context);
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "sudokumaker-community-vscode" is now active!');
@@ -110,16 +115,25 @@ class SudokuMakerEditorProvider implements vscode.CustomTextEditorProvider {
 			enableScripts: true,
 		};
 
-		webviewPanel.webview.html = getWebviewContent();
+		webviewPanel.webview.html = getWebviewContent(this.context);
 	}
 }
 
-function getWebviewContent() {
+function getWebviewContent(context: vscode.ExtensionContext) {
+	const scriptPath = context.asAbsolutePath(path.join("inject", "page.js"));
+	const scriptFile = fs.readFileSync(scriptPath);
 	return `
         <!DOCTYPE html>
         <html lang="en">
+		<head>
+			<script>
+				${scriptFile}
+			</script>
+		</head>
         <body style="margin:0; padding:0; height:100vh; overflow:hidden;">
-            <iframe src="http://localhost:3002"
+            <iframe src="http://${randomUUID()}.localhost:3003"
+				allow="clipboard-read; clipboard-write"
+				sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-pointer-lock allow-presentation"
                     style="width:100%; height:100%; border:none;">
             </iframe>
         </body>
