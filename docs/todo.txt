@@ -16,8 +16,14 @@
 
 . Add UserScript Loading
 . Add UserScript Selection Setting
+. Make File Loading Reactive (Eg. keep all active UserScripts and injection scripts always up to date in memory)
+. Add Remote File Loading (Load UserScripts from GitHub, check for updates on startup)
 
+. Add Good way to create new puzzles
+. Add Warnings to Buttons, that they affect the current file (Maybe rename them, maybe remove them)
 . Add Setting for Recent Files (should they be enabled, or automatically cleared)
+. Create UserScript that automatically adds resize buttons (Eg. change puzzle from sudoku to custom / change size)
+. Load Some UserScripts by default
 
 . Add Yaml Support
 . Create Yaml UserScript for the Browser (Or get yaml support added to the app)
