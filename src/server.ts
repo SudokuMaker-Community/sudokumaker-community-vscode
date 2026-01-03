@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
+
 import express from 'express';
 import { createProxyMiddleware, RequestHandler, responseInterceptor } from 'http-proxy-middleware';
-import * as fs from 'fs';
-import path from 'node:path';
 import { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { AddressInfo } from 'node:net';
+
 import * as config from './config';
+import * as files from './files';
+import { SCRIPTS } from './constants';
 
 
 export interface ServerContext {
@@ -19,8 +21,6 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
     return new Promise((resolve, reject) => {
         const app = express();
 
-        const scriptPath = context.asAbsolutePath(path.join("scripts", "sudokumaker", "script.js"));
-
         let middleware: RequestHandler<IncomingMessage, ServerResponse<IncomingMessage>, (err?: any) => void>;
         setTargetUrl(config.getSudokuMakerUrl());
 
@@ -31,9 +31,8 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
                 selfHandleResponse: true,
                 on: {
                     proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
-                        // TODO: Add cache headers (no caching)
                         if (res.getHeader("Content-Type")?.toString().includes("text/html")) {
-                            const scriptFile = fs.readFileSync(scriptPath);
+                            const scriptFile = files.loadScript(context, SCRIPTS.sudokumaker.script);
                             const script = `
                             <script>
                                 ${scriptFile}

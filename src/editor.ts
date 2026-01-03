@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
-import * as cache from "./cache";
-import * as fs from 'fs';
+
 import path from 'node:path';
 import { AddressInfo } from 'node:net';
+
+import * as cache from "./cache";
+import * as files from './files';
+import { SCRIPTS } from './constants';
 
 export class SudokuMakerEditorProvider implements vscode.CustomTextEditorProvider {
     constructor(private readonly context: vscode.ExtensionContext, private readonly address: AddressInfo) { }
@@ -18,7 +21,8 @@ export class SudokuMakerEditorProvider implements vscode.CustomTextEditorProvide
 
 function getWebviewContent(context: vscode.ExtensionContext, address: AddressInfo) {
     const scriptPath = context.asAbsolutePath(path.join("scripts", "webview", "page.js"));
-    const scriptFile = fs.readFileSync(scriptPath);
+    const scriptFile = files.loadScript(context, SCRIPTS.webview.page);
+
     return `
         <!DOCTYPE html>
         <html lang="en">

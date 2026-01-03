@@ -16,6 +16,15 @@ export const NAMES = {
     }
 } as const;
 
+export const SCRIPTS = {
+    sudokumaker: {
+        script: "sudokumaker/script.js",
+    },
+    webview: {
+        page: "webview/page.js",
+    },
+} as const;
+
 export function withNS<K extends string>(key: K): `${typeof NAMES.namespace}.${K}` {
     return `${NAMES.namespace}.${key}`;
 }

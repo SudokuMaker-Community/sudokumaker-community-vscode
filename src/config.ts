@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { NAMES } from "./constants";
 
 export function getSudokuMakerUrl() {
