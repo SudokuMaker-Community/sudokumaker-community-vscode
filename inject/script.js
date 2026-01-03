@@ -53,4 +53,10 @@
         }, { capture: true, passive: false });
 
     }
+
+    // document.querySelectorAll(".DocumentButtons > .ButtonGroup").forEach(node => {
+    //     node.remove();
+    // });
+
+
 })();

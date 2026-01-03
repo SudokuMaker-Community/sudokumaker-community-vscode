@@ -22,6 +22,11 @@
         "command": "sudokumaker-community-vscode.openEditorToSide",
         "title": "SudokuMaker: Open Editor to the Side",
         "icon": "$(preview)"
+      },
+      {
+        "command": "sudokumaker-community-vscode.invalidateEditorCache",
+        "title": "SudokuMaker: Invalidate Editor Cache",
+        "icon": "$(archive)"
       }
     ],
     "customEditors": [
@@ -52,6 +57,22 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "SudokuMaker Community",
+      "type": "object",
+      "properties": {
+        "sudokumaker-community-vscode.sudokuMakerURL": {
+          "type": "string",
+          "format": "uri",
+          "default": "https://sudokumaker.app",
+          "examples": [
+            "https://sudokumaker.app",
+            "https://dev.sudokumaker.app"
+          ],
+          "description": "BaseURL used to render the Editor"
+        }
+      }
     }
   },
   "scripts": {
