@@ -9,6 +9,28 @@ import path from 'node:path';
 import { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { AddressInfo } from 'node:net';
 
+const NAMES = {
+	namespace: "sudokumaker-community-vscode",
+	commands: {
+		openSourceToSide: "openSourceToSide",
+		openEditorToSide: "openEditorToSide",
+		invalidateEditorCache: "invalidateEditorCache",
+	},
+	customEditors: {
+		editor: "editor",
+	},
+	config: {
+		sudokuMakerURL: {
+			name: "sudokuMakerURL",
+			default: "https://sudokumaker.app",
+		}
+	}
+} as const;
+
+function withNS<K extends string>(key: K): `${typeof NAMES.namespace}.${K}` {
+	return `${NAMES.namespace}.${key}`;
+}
+
 interface ServerContext {
 	server: Server<typeof IncomingMessage, typeof ServerResponse>
 	address: AddressInfo
@@ -17,8 +39,11 @@ interface ServerContext {
 }
 
 function getSudokuMakerUrl() {
-	return vscode.workspace.getConfiguration("sudokumaker-community-vscode")
-		.get<string>("sudokuMakerURL")!;
+	return (
+		vscode.workspace.getConfiguration(NAMES.namespace)
+			.get<string>(NAMES.config.sudokuMakerURL.name)
+		?? NAMES.config.sudokuMakerURL.default
+	);
 }
 
 function startServer(context: vscode.ExtensionContext): Promise<ServerContext> {
@@ -73,7 +98,7 @@ function startServer(context: vscode.ExtensionContext): Promise<ServerContext> {
 				if (!(typeof address === "object") || address === null) {
 					reject(new Error(`Error: Invalid Address (${address})`));
 				} else {
-					console.log(`Proxy server running on http://${address.address}:${address.port}`);
+					console.log(`Proxy server running on http://localhost:${address.port}`);
 					resolve({
 						server,
 						address,
@@ -106,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"sudokumaker-community-vscode.openSourceToSide",
+			withNS(NAMES.commands.openSourceToSide),
 			(uri) => openCurrentDocumentToTheSide(
 				uri,
 				"vscode.textEditor"
@@ -116,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"sudokumaker-community-vscode.openEditorToSide",
+			withNS(NAMES.commands.openEditorToSide),
 			(uri) => openCurrentDocumentToTheSide(
 				uri,
 				"sudokumaker-community-vscode.editor"
@@ -126,14 +151,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"sudokumaker-community-vscode.invalidateEditorCache",
+			withNS(NAMES.commands.invalidateEditorCache),
 			() => generateNewCacheId()
 		)
 	);
 
 	context.subscriptions.push(
 		vscode.window.registerCustomEditorProvider(
-			"sudokumaker-community-vscode.editor",
+			withNS(NAMES.customEditors.editor),
 			new SudokuMakerEditorProvider(context, serverContext.address),
 			{
 				webviewOptions: {
@@ -144,7 +169,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 
 	vscode.workspace.onDidChangeConfiguration(e => {
-		if (e.affectsConfiguration("sudokumaker-community-vscode.sudokuMakerURL")) {
+		if (e.affectsConfiguration(withNS(NAMES.config.sudokuMakerURL.name))) {
 			serverContext.setTargetUrl(getSudokuMakerUrl());
 			generateNewCacheId();
 		}
