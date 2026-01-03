@@ -32,11 +32,27 @@
             || (!alt && !meta && (
                 (ctrl && !shift && key === "a")
                 || (ctrl && key === "z")
+                || (ctrl && key === " ")
                 || (ctrl && !shift && key === "y")
                 || (ctrl && !shift && key === "x")
             ))
-            || (key?.startsWith("arrow"))
-            || (key === "escape")
+            || (!meta && (
+                (key?.startsWith("arrow"))
+                || (key === "escape")
+                || (key === "enter")
+                || (key === "backspace")
+                || (key === "delete")
+                || (key === "insert")
+                || (key === "home")
+                || (key === "end")
+                || (key === "pageup")
+                || (key === "pagedown")
+                || (key === "insert")
+            ))
+            || (key === "alt")
+            || (key === "control")
+            || (key === "shift")
+            || (key === "altgraph")
         );
     }
 

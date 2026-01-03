@@ -1,0 +1,23 @@
+
+
+
+
+
+. Sync localStorage with Host
+. Improve Keybind Logic (have some default bindings AND read keybinds in localStorage, if available)
+. Fix Clipboard Api
+. Fix Clipboard on Mac
+. Fix File Download Api
+. Fix Link Clicking
+
+. Add Load Streaming (Automatically sending any external state changes to the webview)
+. Add Save Application (Ability to send state from webview)
+. Link with new Load and Save Apis
+
+. Add UserScript Loading
+. Add UserScript Selection Setting
+
+. Add Setting for Recent Files (should they be enabled, or automatically cleared)
+
+. Add Yaml Support
+. Create Yaml UserScript for the Browser (Or get yaml support added to the app)
