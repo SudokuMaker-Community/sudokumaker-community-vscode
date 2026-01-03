@@ -40,23 +40,27 @@
         );
     }
 
-    for (const eventType of ["keydown", "keyup", "keypress"]) {
+    function registerKeyHandlers() {
+        for (const eventType of ["keydown", "keyup", "keypress"]) {
 
-        window.addEventListener(eventType, (e) => {
-            if (isMappedKey(e)) {
-                console.log("Key is Mapped: ", e);
-                return;
-            }
-            console.log("Key not Mapped: ", e);
-            window.parent.postMessage({ type: eventType, e: serializeKeyboardEvent(e) }, "*");
-            e.stopPropagation();
-        }, { capture: true, passive: false });
+            window.addEventListener(eventType, (e) => {
+                if (isMappedKey(e)) {
+                    console.log("Key is Mapped: ", e);
+                    return;
+                }
+                console.log("Key not Mapped: ", e);
+                window.parent.postMessage({
+                    type: "key",
+                    data: {
+                        eventType: eventType,
+                        event: serializeKeyboardEvent(e),
+                    },
+                }, "*");
+                e.stopPropagation();
+            }, { capture: true, passive: false });
 
+        }
     }
 
-    // document.querySelectorAll(".DocumentButtons > .ButtonGroup").forEach(node => {
-    //     node.remove();
-    // });
-
-
+    registerKeyHandlers();
 })();
