@@ -78,5 +78,49 @@
         }
     }
 
+    function registerSaveHandlers() {
+        const originalStringify = window.JSON.stringify;
+        function stringify(val, ...args) {
+            if (
+                val !== undefined
+                && typeof val === 'object'
+                && val.formatVersion !== undefined
+                && val.puzzle?.cells !== undefined
+            ) {
+                window.parent.postMessage({
+                    type: "save",
+                    data: {
+                        json: originalStringify(val, ...args)
+                    },
+                }, "*");
+            }
+            return originalStringify(val, ...args);
+        }
+        window.JSON.stringify = stringify;
+
+        function loadData(json) {
+            const loadedPuzzle = new window.DataDecompressor().loadFromJSON(json);
+            Api.updatePuzzle(p => Object.assign(p, loadedPuzzle));
+        }
+
+        window.addEventListener("message", (e) => {
+            const { type, data } = e.data;
+            if (type === "load") {
+                const json = data.json;
+                const f = () => {
+                    try {
+                        loadData(json);
+                        console.log("loaded", json);
+                    } catch (e) {
+                        console.error(e);
+                        window.setTimeout(f, 1000);
+                    }
+                };
+                f();
+            }
+        });
+    }
+
     registerKeyHandlers();
+    registerSaveHandlers();
 })();

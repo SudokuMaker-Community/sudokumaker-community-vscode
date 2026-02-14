@@ -14,6 +14,27 @@
             );
             window.dispatchEvent(event);
         }
+    });
 
+    window.addEventListener("DOMContentLoaded", () => {
+        const frame = document.getElementById("sudokumaker-frame");
+
+        window.addEventListener("message", e => {
+            const { type, data } = e.data;
+
+            if (e.source === frame.contentWindow) {
+                if (type === "save") {
+                    window.postMessage({
+                        type, data
+                    }, "*");
+                }
+            } else {
+                if (type === "load") {
+                    frame.contentWindow.postMessage({
+                        type, data
+                    }, "*");
+                }
+            }
+        });
     });
 })();

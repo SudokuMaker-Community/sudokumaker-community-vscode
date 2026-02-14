@@ -22,6 +22,7 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
         const app = express();
 
         let middleware: RequestHandler<IncomingMessage, ServerResponse<IncomingMessage>, (err?: any) => void>;
+        let serverContext: ServerContext;
         setTargetUrl(config.getSudokuMakerUrl());
 
         function setTargetUrl(url: string) {
@@ -31,6 +32,18 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
                 selfHandleResponse: true,
                 on: {
                     proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+
+                        function transformFile(text: string): string {
+                            let result = text;
+
+                            result = result.replace(url.replace(/[//\/]+$/, ""), `http://localhost:${serverContext.address.port}`);
+                            if (result.includes("decompressData")) {
+                                console.log(result);
+                                result = result.replace(/class\s(.{1,10})\{(.*?decompressData\()/, "class $1{static wwwww=(function(){window.DataDecompressor = $1})();$2");
+                            }
+                            return result;
+                        }
+
                         if (res.getHeader("Content-Type")?.toString().includes("text/html")) {
                             const scriptFile = files.loadScript(context, SCRIPTS.sudokumaker.script);
                             const script = `
@@ -40,11 +53,13 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
                         `;
                             const headTag = "<head>";
                             const replacement = `${headTag}${script.trim()}`;
-                            return (
+                            return transformFile(
                                 responseBuffer
                                     .toString()
                                     .replace(headTag, replacement)
                             );
+                        } else if (req.url?.endsWith(".js")) {
+                            return transformFile(responseBuffer.toString());
                         } else {
                             return responseBuffer;
                         }
@@ -67,14 +82,15 @@ export function startServer(context: vscode.ExtensionContext): Promise<ServerCon
                     reject(new Error(`Error: Invalid Address (${address})`));
                 } else {
                     console.log(`Proxy server running on http://localhost:${address.port}`);
-                    resolve({
+                    serverContext = {
                         server,
                         address,
                         disposable: {
                             dispose: () => server.close()
                         },
                         setTargetUrl
-                    });
+                    };
+                    resolve(serverContext);
                 }
             } else {
                 console.log("Error starting local WebServer:", e);
