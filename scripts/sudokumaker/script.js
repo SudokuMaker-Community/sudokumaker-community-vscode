@@ -121,6 +121,18 @@
         });
     }
 
+    function disableUrlSetting() {
+        function replaceState() { }
+        window.history.replaceState = replaceState;
+    }
+
+    function getFileJson(e) {
+        return window.fileJSON;
+        // return `{"formatVersion":"1.5.0","puzzle":{"name":"","author":"","cells":[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{"given":true,"value":4},{},{},{},{},{},{},{},{},{},{"given":true,"value":3},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}],"constraints":[{"type":0},{"type":1,"regions":[0,0,0,1,1,1,2,2,2,0,0,0,1,1,1,2,2,2,0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,3,3,3,4,4,4,5,5,5,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,6,6,6,7,7,7,8,8,8,6,6,6,7,7,7,8,8,8]}]}}`;
+    }
+    window.getFileJson = getFileJson;
+
     registerKeyHandlers();
     registerSaveHandlers();
+    disableUrlSetting();
 })();

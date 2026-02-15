@@ -1,6 +1,8 @@
 (function () {
     'use strict';
 
+    const vscode = acquireVsCodeApi();
+
     window.addEventListener("message", e => {
         const { type, data } = e.data;
 
@@ -24,7 +26,7 @@
 
             if (e.source === frame.contentWindow) {
                 if (type === "save") {
-                    window.postMessage({
+                    vscode.postMessage({
                         type, data
                     }, "*");
                 }
