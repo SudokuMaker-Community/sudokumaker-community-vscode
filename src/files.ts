@@ -54,3 +54,30 @@ export function loadJsonFromUUID(uuid: UUIDString): string | undefined {
 
     return JSON.stringify(json);
 }
+
+const yamlOptions = {
+    collectionStyle: "block",
+    defaultKeyType: "PLAIN",
+    defaultStringType: "BLOCK_LITERAL",
+    lineWidth: 0,
+    indent: 2,
+} as const;
+
+export function saveJsonToUUID(uuid: UUIDString, jsonString: string) {
+    const uriString = uriMap.get(uuid);
+    if (uriString === undefined) {
+        return undefined;
+    }
+    const uri = vscode.Uri.parse(uriString);
+    const json = JSON.parse(jsonString);
+
+    let fileContent = null;
+
+    if (uriString.endsWith(".yaml")) {
+        fileContent = YAML.stringify(json, yamlOptions);
+    } else {
+        fileContent = JSON.stringify(json, null, 2);
+    }
+
+    fs.writeFileSync(uri.fsPath, fileContent);
+}

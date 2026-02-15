@@ -18,10 +18,21 @@ export class SudokuMakerEditorProvider implements vscode.CustomTextEditorProvide
             enableScripts: true,
         };
 
-        webviewPanel.webview.html = this.getWebviewContent(document);
+        const fileId = files.getFileId(document.uri);
+
+        webviewPanel.webview.html = this.getWebviewContent(fileId);
         webviewPanel.webview.onDidReceiveMessage((e) => {
             console.log("Event received:", e);
+            if (e.type === "save") {
+                const json = e.data?.json;
+                if (json !== undefined) {
+                    files.saveJsonToUUID(fileId, json);
+                }
+            }
         });
+
+        //TODO: Add File watching 
+
         // webviewPanel.webview.postMessage({
         //     type: "load",
         //     data: {
@@ -30,9 +41,9 @@ export class SudokuMakerEditorProvider implements vscode.CustomTextEditorProvide
         // });
     }
 
-    getWebviewContent(document: vscode.TextDocument) {
+    getWebviewContent(fileId: string) {
         const scriptFile = files.loadScript(this.context, SCRIPTS.webview.page);
-        const fileId = files.getFileId(document.uri);
+
 
         //TODO: Maybe use UUID instead of file uri and store file uris in a hash map
 
